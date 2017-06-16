@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Posts on Yerken&#39;s blog</title>
+    <link>https://ideahitme.github.io/posts/</link>
+    <description>Recent content in Posts on Yerken&#39;s blog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Thu, 15 Jun 2017 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="https://ideahitme.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Is this thing on?</title>
+      <link>https://ideahitme.github.io/posts/test/</link>
+      <pubDate>Thu, 15 Jun 2017 00:00:00 +0000</pubDate>
+      
+      <guid>https://ideahitme.github.io/posts/test/</guid>
+      <description>Some mathematician, I believe, has said that true pleasure lies not in the discovery of truth, but in the search for it.
+ Tolstoy</description>
+    </item>
+    
+  </channel>
+</rss>
