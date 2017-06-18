@@ -50,7 +50,7 @@ Implementing data structures in Go is easy due to the presence of slices and map
 
 
 <meta itemprop="dateModified" content="2017-06-17T00:00:00&#43;00:00" />
-<meta itemprop="wordCount" content="1578">
+<meta itemprop="wordCount" content="1582">
 
 
 
@@ -301,7 +301,10 @@ func (s *SparseSet) Insert(x uint32) {
 
 <p>One of the great features of <code>Go</code> is the ability to invoke <code>C</code> code (more details here <a href="https://github.com/golang/go/wiki/cgo">https://github.com/golang/go/wiki/cgo</a>) and all we have to do is to import the <code>C</code> library:</p>
 
-<pre><code>import &quot;C&quot;
+<pre><code>/*
+#include &lt;stdlib.h&gt;
+*/
+import &quot;C&quot;
 </code></pre>
 
 <p>So now our <code>sparse</code> allocation would look like:</p>
