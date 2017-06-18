@@ -6,10 +6,19 @@
     <description>Recent content in Tags on Yerken&#39;s blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Thu, 15 Jun 2017 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Sat, 17 Jun 2017 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="https://ideahitme.github.io/tags/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Go Cgo Sparse Set Data Structures</title>
+      <link>https://ideahitme.github.io/tags/go-cgo-sparse-set-data-structures/</link>
+      <pubDate>Sat, 17 Jun 2017 00:00:00 +0000</pubDate>
+      
+      <guid>https://ideahitme.github.io/tags/go-cgo-sparse-set-data-structures/</guid>
+      <description></description>
+    </item>
     
     <item>
       <title>One Two One Two</title>

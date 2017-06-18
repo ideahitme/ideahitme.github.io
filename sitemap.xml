@@ -3,7 +3,12 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
-    <loc>https://ideahitme.github.io/posts/test/</loc>
+    <loc>https://ideahitme.github.io/posts/sparse-set-in-go/</loc>
+    <lastmod>2017-06-17T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://ideahitme.github.io/posts/intro/</loc>
     <lastmod>2017-06-15T00:00:00+00:00</lastmod>
   </url>
   
@@ -14,6 +19,30 @@
   
   <url>
     <loc>https://ideahitme.github.io/categories/</loc>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://ideahitme.github.io/categories/cgo/</loc>
+    <lastmod>2017-06-17T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://ideahitme.github.io/categories/data-structures/</loc>
+    <lastmod>2017-06-17T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://ideahitme.github.io/categories/go/</loc>
+    <lastmod>2017-06-17T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://ideahitme.github.io/tags/go-cgo-sparse-set-data-structures/</loc>
+    <lastmod>2017-06-17T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -31,19 +60,31 @@
   
   <url>
     <loc>https://ideahitme.github.io/posts/</loc>
-    <lastmod>2017-06-15T00:00:00+00:00</lastmod>
+    <lastmod>2017-06-17T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://ideahitme.github.io/categories/set/</loc>
+    <lastmod>2017-06-17T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://ideahitme.github.io/categories/sparse/</loc>
+    <lastmod>2017-06-17T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
     <loc>https://ideahitme.github.io/tags/</loc>
-    <lastmod>2017-06-15T00:00:00+00:00</lastmod>
+    <lastmod>2017-06-17T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
     <loc>https://ideahitme.github.io/</loc>
-    <lastmod>2017-06-15T00:00:00+00:00</lastmod>
+    <lastmod>2017-06-17T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   

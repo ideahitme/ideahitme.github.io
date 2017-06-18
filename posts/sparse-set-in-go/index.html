@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en-us">
+	<head>
+    <meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="author" content="Yerken">
+<meta name="description" content="Describe your website">
+<meta name="generator" content="Hugo 0.23-DEV" />
+<title>Sparse set in Go</title>
+<link rel="shortcut icon" href="https://ideahitme.github.io/images/favicon.ico">
+<link rel="stylesheet" href="https://ideahitme.github.io/css/style.css">
+<link rel="stylesheet" href="https://ideahitme.github.io/css/highlight.css">
+
+
+
+<link rel="stylesheet" href="https://ideahitme.github.io/css/monosocialiconsfont.css">
+
+
+
+
+<meta property="og:title" content="Sparse set in Go" />
+<meta property="og:description" content="This post is inspired by https://research.swtch.com/sparse
+Complete code: https://github.com/ideahitme/go-and-learn/blob/master/golang/cgo/sparse.go
+Implementing data structures in Go is easy due to the presence of slices and maps which allows data structures like queue, stack programmed in just few lines of code. Implementing sets should not be too difficult either, but let&rsquo;s take a closer look at two different ways of doing it. First is the most commonly seen implementation via map and the other will utilize an interesting data structure called sparse set." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://ideahitme.github.io/posts/sparse-set-in-go/" />
+
+
+
+<meta property="article:published_time" content="2017-06-17T00:00:00&#43;00:00"/>
+<meta property="article:modified_time" content="2017-06-17T00:00:00&#43;00:00"/>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<meta itemprop="name" content="Sparse set in Go">
+<meta itemprop="description" content="This post is inspired by https://research.swtch.com/sparse
+Complete code: https://github.com/ideahitme/go-and-learn/blob/master/golang/cgo/sparse.go
+Implementing data structures in Go is easy due to the presence of slices and maps which allows data structures like queue, stack programmed in just few lines of code. Implementing sets should not be too difficult either, but let&rsquo;s take a closer look at two different ways of doing it. First is the most commonly seen implementation via map and the other will utilize an interesting data structure called sparse set.">
+
+
+<meta itemprop="dateModified" content="2017-06-17T00:00:00&#43;00:00" />
+<meta itemprop="wordCount" content="1578">
+
+
+
+<meta itemprop="keywords" content="cgo,data-structures,go,not-golang,set,sparse,go-cgo-sparse-set-data-structures,one-two-one-two," />
+
+
+
+  <meta name="twitter:card" content="summary"/>
+
+
+
+<meta name="twitter:text:title" content="Sparse set in Go"/>
+<meta name="twitter:title" content="Sparse set in Go"/>
+<meta name="twitter:description" content="This post is inspired by https://research.swtch.com/sparse
+Complete code: https://github.com/ideahitme/go-and-learn/blob/master/golang/cgo/sparse.go
+Implementing data structures in Go is easy due to the presence of slices and maps which allows data structures like queue, stack programmed in just few lines of code. Implementing sets should not be too difficult either, but let&rsquo;s take a closer look at two different ways of doing it. First is the most commonly seen implementation via map and the other will utilize an interesting data structure called sparse set."/>
+<meta name="twitter:site" content="@https://www.twitter.com/ideahitme"/>
+
+
+    </head>
+<body>
+    <nav class="main-nav">
+	
+		<a href='https://ideahitme.github.io/'> <span class="arrow">←</span>Home</a>
+	
+
+	
+ 		<a href='/about/'>About</a>
+  	
+
+	
+</nav>
+
+    <section id="wrapper">
+        
+        
+<article class="post">
+    <header>
+        <h1>Sparse set in Go</h1>
+        <h2 class="headline">
+        June 17, 2017
+        <br>
+        
+        
+            
+                <a href="https://ideahitme.github.io/tags/go-cgo-sparse-set-data-structures">Go Cgo Sparse Set Data structures</a>
+            
+        
+        
+        </h2>
+    </header>
+    <section id="post-body">
+        
+
+<p><em>This post is inspired by <a href="https://research.swtch.com/sparse">https://research.swtch.com/sparse</a></em></p>
+
+<p><em>Complete code: <a href="https://github.com/ideahitme/go-and-learn/blob/master/golang/cgo/sparse.go">https://github.com/ideahitme/go-and-learn/blob/master/golang/cgo/sparse.go</a></em></p>
+
+<p>Implementing data structures in Go is easy due to the presence of slices and maps which allows data structures like <code>queue</code>, <code>stack</code> programmed in just few lines of code. Implementing <strong>sets</strong> should not be too difficult either, but let&rsquo;s take a closer look at two different ways of doing it. First is the most commonly seen implementation via <code>map</code> and the other will utilize an interesting data structure called <code>sparse set</code>. The latter, however, will require us to do some <strong>C</strong> code invocation for additional optimization.</p>
+
+<p>I would like to point out that the word <strong>set</strong> in this text means a data structure which stores <strong>unordered</strong> set of unique integers and is different from C++ <code>std::set</code>.</p>
+
+<p>Let&rsquo;s begin by defining an interface for our set implementation:</p>
+
+<pre><code class="language-go">
+type Set interface { 
+  Insert(uint32) // Insert new element if not present
+  Find(uint32) bool // Check if element is in the set
+  Iterate() []uint32 // Provide a way to iterate over inserted elements
+  Clear() // Clear the set
+}
+
+</code></pre>
+
+<p><em>(we omit <code>Remove</code> operation at least in the scope of this post)</em></p>
+
+<h3 id="mapset">MapSet</h3>
+
+<p>The most common way to implement a set is to use a hash map, one of the possible implementations is described below:</p>
+
+<pre><code class="language-go">type MapSet map[uint32]bool
+
+func (ms MapSet) Insert(x uint32) { 
+  ms[x] = true
+}
+
+func (ms MapSet) Find(x uint32) bool{ 
+  return ms[x]
+}
+
+func (ms MapSet) Iterate() []uint32 { 
+  result := make([]uint32, 0, len(ms))
+  for x := range ms { 
+    result = append(result, x)
+  }
+  return result
+}
+
+func (ms MapSet) Clear() { 
+  for x := range ms { 
+    delete(ms, x)
+  }
+}
+
+...
+
+// usage
+set := MapSet{}
+set.Insert(1)
+set.Find(1) //true
+
+</code></pre>
+
+<p>The <code>MapSet</code> implementation is completely fine and it is probably the simplest and cleanest solution in most of the cases. However it has two downsides, both <code>Clear()</code> and <code>Iterate()</code> methods require <code>O(n)</code> operations for the keys of the map to be extracted. That&rsquo;s where <strong>sparse set</strong> comes to rescue.</p>
+
+<h3 id="sparse-set">Sparse Set</h3>
+
+<p>The idea behind sparse set is to maintain two arrays, namely <code>dense</code> and <code>sparse</code>:</p>
+
+<ul>
+<li><code>dense</code> array stores elements in the order of their arrival</li>
+<li><code>sparse</code> is an array which elements point to the location where given element is in <code>dense</code></li>
+</ul>
+
+<p>To understand it better, let&rsquo;s consider the following example:</p>
+
+<p>In the beginning our sparse set has no elements. And now we want to insert <code>4</code> into it:</p>
+
+<p>Before:
+<code>dense: []</code>
+<code>sparse: []</code></p>
+
+<p>After:
+<code>dense:[4]</code>
+<code>sparse:[_,_,_,_,0]</code></p>
+
+<p>Now let&rsquo;s insert <code>2</code>,</p>
+
+<p>Before:
+<code>dense:[4]</code>
+<code>sparse:[_,_,_,_,0]</code></p>
+
+<p>After:
+<code>dense:[4, 2]</code>
+<code>sparse:[_,_,1,_,0]</code></p>
+
+<p>So <code>dense</code> simply stores the elements as they arrive into the set. While <code>sparse</code> stores the indexes where this element exist in <code>dense</code>. So if we want to find if element <code>2</code> is present in the set, all we have to do is check <code>sparse[2]</code>, which will give us the index of <code>dense</code> where <code>2</code> is present. Therefore, for any <code>x</code> in the set, the following holds true <code>dense[sparse[x]] == x</code>. So far so good.</p>
+
+<p>Let&rsquo;s look at one of the naive Go implementations:</p>
+
+<pre><code class="language-go">type NaiveSparseSet struct {
+	dense  []uint32
+	sparse []int
+}
+
+func (ns *NaiveSparseSet) Insert(x uint32) {
+	ns.sparse[x] = len(ns.dense)
+	ns.dense = append(ns.dense, x)
+}
+</code></pre>
+
+<p>Apparently there is a problem, if we call <code>(&amp;NaiveSparseSet{}).Insert(1)</code> the code will panic with index out of bound runtime error. To fix this problem we can ask the user to provide us with the maximum element value that can be stored in the set:</p>
+
+<pre><code class="language-go">func NewNaiveSparseSet(maxValue uint32) *NaiveSparseSet {
+	sparse := make([]int, maxValue)
+	return &amp;NaiveSparseSet{
+		sparse: sparse,
+	}
+}
+</code></pre>
+
+<p>So with this little trick we can now implement <code>Set</code> interface quite simply:</p>
+
+<pre><code class="language-go">func (ns *NaiveSparseSet) Insert(x uint32) {
+	if ns.Find(x) {
+		return
+	}
+	ns.sparse[x] = len(ns.dense)
+	ns.dense = append(ns.dense, x)
+}
+
+func (ns *NaiveSparseSet) Find(x uint32) bool {
+	return ns.sparse[x] &lt; len(ns.dense) &amp;&amp; ns.dense[ns.sparse[x]] == x
+}
+
+func (ns *NaiveSparseSet) Iterate() []uint32 {
+	return ns.dense
+}
+
+func (ns *NaiveSparseSet) Clear() {
+	ns.dense = nil
+}
+
+</code></pre>
+
+<p>It all works and all our operations are constant-time operations, but we added new problems:</p>
+
+<ul>
+<li>Initializing <code>sparse</code> now takes <code>O(max-value)</code> amount of operations</li>
+<li>Consistently calling <code>Clear</code> will cause the underlying arrays to be generated and continuously garbage collected, which is not really necessary as will be shown further</li>
+</ul>
+
+<h3 id="optimized-sparse-set">Optimized Sparse Set</h3>
+
+<p>Let&rsquo;s first solve the GC problem with underlying array of <code>ns.dense</code>. Instead of detaching the slice header, we can simply say that our set has no elements by adding a flag which indicates how many elements we actually have in the set:</p>
+
+<pre><code class="language-go">type SparseSet struct {
+	size   int32
+  ...
+</code></pre>
+
+<p>Therefore, now <code>Clear</code> and <code>Insert</code> can be simply rewritten as:</p>
+
+<pre><code class="language-go">
+func (s *SparseSet) Clear() {
+	s.size = 0
+}
+
+func (s *SparseSet) Insert(x uint32) {
+	if s.Find(x) {
+		return
+	}
+	if int32(len(s.dense)) == s.size { //grow only when necessary
+		s.dense = append(s.dense, x)
+	} else {
+		s.dense[s.size] = x
+	}
+	s.sparse[x] = s.size
+	s.size++
+}
+</code></pre>
+
+<p>Now to the dummy initialization problem. The following line caused the <code>sparse</code> slice to be allocated and <strong>initialized</strong>.</p>
+
+<pre><code class="language-go">sparse := make([]int, maxValue)
+</code></pre>
+
+<p>While the former is required for us to use the memory, we need to understand if <strong>initialization</strong> phase is really necessary. To do that let&rsquo;s check where we actually need to read the <code>sparse</code> data:</p>
+
+<pre><code class="language-go">func (s *SparseSet) Find(x uint32) bool {
+	return s.sparse[x] &lt; s.size &amp;&amp; s.dense[s.sparse[x]] == x
+}
+</code></pre>
+
+<p>So if we had some garbage stored in the <code>s.sparse[x]</code> it would not really affect the correctness of the program, because it would mean that either <code>s.sparse[x]</code> points out of the <code>s.dense</code> boundary, or the value in <code>s.dense[s.sparse[x]]</code> is not actually <code>x</code>.</p>
+
+<p>So how do we allocate a memory without initializing ? Obviously <code>malloc()</code> !</p>
+
+<p>One of the great features of <code>Go</code> is the ability to invoke <code>C</code> code (more details here <a href="https://github.com/golang/go/wiki/cgo">https://github.com/golang/go/wiki/cgo</a>) and all we have to do is to import the <code>C</code> library:</p>
+
+<pre><code>import &quot;C&quot;
+</code></pre>
+
+<p>So now our <code>sparse</code> allocation would look like:</p>
+
+<pre><code>func NewSparseSet(maxValue uint32) (*SparseSet, error) {
+	//allocate a new array via malloc
+	sparse := C.malloc(C.size_t(maxValue * 4))
+	if sparse == nil {
+		return nil, fmt.Errorf(&quot;failed to allocate memory&quot;)
+	}
+	return &amp;SparseSet{sparse: unsafe.Pointer(sparse)}, nil
+}
+</code></pre>
+
+<p>It is important to understand that when we call <code>C</code> code, we are interacting with <code>C</code> types and <code>malloc(1000)</code> returns <code>*void</code> type (pointer to anything) so we have to be precise with the size. Since we are expecting to store <code>uint32</code> (4 bytes) we allocate <code>4 * maxValue</code> amount of memory. Furthermore, we need to be able to do pointer arithmetics, therefore conversion to <code>unsafe.Pointer</code> is needed as well (more on unsafe package <a href="https://github.com/ideahitme/go-and-learn/tree/master/golang/unsafe">https://github.com/ideahitme/go-and-learn/tree/master/golang/unsafe</a>).</p>
+
+<p>This is how we can perform pointer arithmetics to navigate over the <code>s.sparce</code> (type <code>unsafe.Pointer</code>):</p>
+
+<pre><code>// at(i) returns pointer to sparse array in position i
+func (s *SparseSet) at(shift uint32) unsafe.Pointer {
+	return unsafe.Pointer(uintptr(s.sparse) + uintptr(4*shift))
+}
+</code></pre>
+
+<p>So the rest of our code is as simple as:</p>
+
+<pre><code class="language-go">func (s *SparseSet) Clear() {
+	s.size = 0
+}
+
+func (s *SparseSet) Insert(x uint32) {
+	if s.Find(x) {
+		return //already in the set
+	}
+
+	if int32(len(s.dense)) == s.size { //grow only when necessary
+		s.dense = append(s.dense, x)
+	} else {
+		s.dense[s.size] = x
+	}
+
+	mem := (*int32)(s.at(x))
+	*mem = s.size
+	s.size++
+}
+
+func (s *SparseSet) Find(x uint32) bool {
+	mem := (*int32)(s.at(x))
+	return *mem &lt; s.size &amp;&amp; s.dense[*mem] == x
+}
+
+func (s *SparseSet) Iterate() []uint32 {
+	return s.dense
+}
+</code></pre>
+
+<p>All methods now are constant time operations, we do not need to initialize the <code>sparce</code> and we can avoid constant creation of <code>n.dense</code> underlying arrays. But we forgot one little thing, didn&rsquo;t we ? Of course, we forgot that <code>malloc()</code> and <code>free()</code> are very good friends.</p>
+
+<p>It is important to keep in mind that <code>Go</code> runtime has no idea of the memory allocation performed in the <code>C</code> code, therefore it <strong>will never garbage collect</strong> <code>s.sparce</code>. Fortunately, this is quite easy to solve as well:</p>
+
+<pre><code class="language-go">func (s *SparseSet) Free() {
+	C.free(s.sparse)
+}
+...
+
+func main() { 
+  	s, err := NewSparseSet(100000)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer s.Free() //clean up
+	s.Insert(100)
+	fmt.Printf(&quot;is %d in the set: %t\n&quot;, 100, s.Find(100))
+	fmt.Printf(&quot;is %d in the set: %t\n&quot;, 99, s.Find(99))
+	s.Insert(99)
+	fmt.Printf(&quot;is %d in the set: %t\n&quot;, 99, s.Find(99))
+
+// is 100 in the set: true
+// is 99 in the set: false
+// is 99 in the set: true
+}
+</code></pre>
+
+<p><strong>Complete code</strong> for all implementations can be found in <a href="https://github.com/ideahitme/go-and-learn/blob/master/golang/cgo/sparse.go">https://github.com/ideahitme/go-and-learn/blob/master/golang/cgo/sparse.go</a></p>
+
+<h3 id="conclusion">Conclusion</h3>
+
+<p>Use map to implement set when:</p>
+
+<ul>
+<li>Not operating on large data sets</li>
+<li>Iteration is not really needed</li>
+<li>Set does not need to be cleared</li>
+</ul>
+
+<p><code>MapSet</code> is the cleanest and recommended way of implementing sets and should be used in 99% of the cases.</p>
+
+<hr />
+
+<p>Use naive sparse set implementation when:</p>
+
+<ul>
+<li>Not operating on large data sets</li>
+<li>Iteration is needed</li>
+<li>Clear is not called often</li>
+</ul>
+
+<p><code>NaiveSparseSet</code> is has some advantages over its optimized version due to the abscense of direct <code>C</code> code invocation and it is type safety guarantees.</p>
+
+<hr />
+
+<p>Use optimized sparse set implementation when:</p>
+
+<ul>
+<li>Max value is not too large</li>
+<li>Iteration is needed</li>
+<li>Clear is called often</li>
+</ul>
+
+<p><code>SparseSet</code> is a great example of cases when we do not need to operate on initialized arrays, we can take advantage of reducing time and resource utilizations for initialization stage and work with &ldquo;dirty&rdquo; data.</p>
+
+<hr />
+
+<h3 id="what-s-next">What&rsquo;s next ?</h3>
+
+<p>In the next post I will do some benchmarking and compare these implementations on various data sets and utilize some of the great profiling capabilities of Go.  We will also try to find a way to circumvent the need for the max-value, i.e. the maximum number which can be stored in the sparse set.</p>
+
+<h3 id="links">Links</h3>
+
+<ol>
+<li><a href="https://research.swtch.com/sparse">https://research.swtch.com/sparse</a></li>
+<li><a href="https://github.com/golang/go/wiki/cgo">https://github.com/golang/go/wiki/cgo</a></li>
+<li><a href="https://github.com/ideahitme/go-and-learn/tree/master/golang/unsafe">https://github.com/ideahitme/go-and-learn/tree/master/golang/unsafe</a></li>
+</ol>
+
+    </section>
+</article>
+
+<footer id="post-meta" class="clearfix">
+    
+    <img class="avatar" src="https://ideahitme.github.io/images/yerken.png">
+    <div>
+        <span class="dark">Yerken</span>
+        <span>I&#39;m an idiot.</span>
+    </div>
+    
+    <section id="sharing">
+        <a class="twitter" href="https://twitter.com/intent/tweet?text=https%3a%2f%2fideahitme.github.io%2fposts%2fsparse-set-in-go%2f - Sparse%20set%20in%20Go "><span class="icon-twitter"> tweet</span></a>
+
+<a class="facebook" href="#" onclick="
+    window.open(
+      'https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(location.href),
+      'facebook-share-dialog',
+      'width=626,height=436');
+    return false;"><span class="icon-facebook-rect"> Share</span>
+</a>
+
+    </section>
+</footer>
+
+
+
+<ul id="post-list" class="archive readmore">
+    <h3>Read more</h3>
+
+    
+    
+    
+        <li>
+            <a href="/posts/intro/">Is this thing on?<aside class="dates">Jun 15 2017</aside></a>
+        </li>
+    
+</ul>
+
+
+
+        <footer id="footer">
+    
+        <div id="social">
+
+	
+	
+    
+    <a class="symbol" href="https://www.github.com/ideahitme">
+        circlegithub
+    </a>
+    
+    <a class="symbol" href="https://www.twitter.com/ideahitme">
+        circletwitterbird
+    </a>
+    
+
+
+</div>
+
+    
+    <p class="small">
+    
+        © Copyright 2017 Yerken
+    
+    </p>
+</footer>
+
+    </section>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+<script src="https://ideahitme.github.io/js/main.js"></script>
+<script src="https://ideahitme.github.io/js/highlight.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+
+
+
+
+</body>
+</html>
