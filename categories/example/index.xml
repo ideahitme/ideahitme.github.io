@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Example on Yerken&#39;s blog</title>
+    <link>https://ideahitme.github.io/categories/example/</link>
+    <description>Recent content in Example on Yerken&#39;s blog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Thu, 22 Jun 2017 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="https://ideahitme.github.io/categories/example/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Go concurrency patterns</title>
+      <link>https://ideahitme.github.io/posts/i-like-what-my-friends-like/</link>
+      <pubDate>Thu, 22 Jun 2017 00:00:00 +0000</pubDate>
+      
+      <guid>https://ideahitme.github.io/posts/i-like-what-my-friends-like/</guid>
+      <description>Concurrency in Go This post is aimed at beginner/intermediate level Go developers who want to see some cool usage of Go channels and concurrency patterns. We will start with a rather simple task:
+ I like to spend my time on Github browing and starring repos I like and following some really brilliant engineers. And one day I figured that most of the people I follow are gophers, which is really cool.</description>
+    </item>
+    
+  </channel>
+</rss>

@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en-us">
+	<head>
+    <meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="author" content="Yerken">
+<meta name="description" content="Describe your website">
+<meta name="generator" content="Hugo 0.23-DEV" />
+<title>Go concurrency patterns</title>
+<link rel="shortcut icon" href="https://ideahitme.github.io/images/favicon.ico">
+<link rel="stylesheet" href="https://ideahitme.github.io/css/style.css">
+<link rel="stylesheet" href="https://ideahitme.github.io/css/highlight.css">
+
+
+
+<link rel="stylesheet" href="https://ideahitme.github.io/css/monosocialiconsfont.css">
+
+
+
+
+<meta property="og:title" content="Go concurrency patterns" />
+<meta property="og:description" content="Pipelines in Go" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://ideahitme.github.io/posts/i-like-what-my-friends-like/" />
+
+
+
+<meta property="article:published_time" content="2017-06-22T00:00:00&#43;00:00"/>
+<meta property="article:modified_time" content="2017-06-22T00:00:00&#43;00:00"/>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<meta itemprop="name" content="Go concurrency patterns">
+<meta itemprop="description" content="Pipelines in Go">
+
+
+<meta itemprop="dateModified" content="2017-06-22T00:00:00&#43;00:00" />
+<meta itemprop="wordCount" content="1446">
+
+
+
+<meta itemprop="keywords" content="cgo,channels,concurrency,data-structures,example,explained,go,not-golang,set,sparse,go-cgo-sparse-set-data-structures,go-channels-concurrency-github-api,one-two-one-two," />
+
+
+
+  <meta name="twitter:card" content="summary"/>
+
+
+
+<meta name="twitter:text:title" content="Go concurrency patterns"/>
+<meta name="twitter:title" content="Go concurrency patterns"/>
+<meta name="twitter:description" content="Pipelines in Go"/>
+<meta name="twitter:site" content="@https://www.twitter.com/ideahitme"/>
+
+
+    </head>
+<body>
+    <nav class="main-nav">
+	
+		<a href='https://ideahitme.github.io/'> <span class="arrow">←</span>Home</a>
+	
+
+	
+ 		<a href='/about/'>About</a>
+  	
+
+	
+</nav>
+
+    <section id="wrapper">
+        
+        
+<article class="post">
+    <header>
+        <h1>Go concurrency patterns</h1>
+        <h2 class="headline">
+        June 22, 2017
+        <br>
+        
+        
+            
+                <a href="https://ideahitme.github.io/tags/go-channels-concurrency-github-api">Go Channels Concurrency Github API</a>
+            
+        
+        
+        </h2>
+    </header>
+    <section id="post-body">
+        
+
+<h2 id="concurrency-in-go">Concurrency in Go</h2>
+
+<p>This post is aimed at beginner/intermediate level Go developers who want to see some cool usage of Go channels and concurrency patterns. We will start with a rather simple task:</p>
+
+<blockquote>
+<p>I like to spend my time on Github browing and starring repos I like and following some really brilliant engineers. And one day I figured that most of the people I follow are gophers, which is really cool. But I would also like to know what kind of projects they like ? Maybe all of them already follow some repository, which I am totally unaware of ? Let&rsquo;s find out :P</p>
+</blockquote>
+
+<p>So you might have even started building some patterns in your head about how you would solve this problem, or maybe you had something like that in your mind:</p>
+
+<pre><code class="language-go">func main(){
+  followedUsers, err := githubCli.getFollowedUsers(myGithubHandle, myToken string)
+  ...
+  allRepos := make([]Repo, 0)
+  for _, user := range followedUsers { 
+    starredRepos, err := githubCli.getStarredRepos(user.Handle, myToken string)
+    ...
+    allRepos = append(allRepos, starredRepos...)
+  }
+  ...
+  // some boring job goes on here to merge the answer 
+}
+</code></pre>
+
+<p>No, not this time. Instead we are going to use channels and calculate the answer in a concurrent fasion. So assume we came up with some API which gives a channel from where we can consume repositories and simply write them to the map:</p>
+
+<pre><code class="language-go">type Repo struct { 
+  Name string 
+  Link string
+}
+...
+answer := map[string]uint16{} // repository name -&gt; how many stars among the people I follow
+
+repos := reposStarredBy(usersFollowedBy(githubHandle string)) // reposStarredBy returns a &lt;-chan *Repo
+
+for repo := range repos { 
+  answer[repo.Name]++
+}
+</code></pre>
+
+<p>Notice how this style looks a lot cleaner and more expressive. So let&rsquo;s take a deep look into the <code>usersFollowedBy</code> and <code>reposStarredBy</code> functions.</p>
+
+<p>This is the endpoint we are going to use to retrieve the list of people I follow:</p>
+
+<pre><code class="language-go">const(
+  fmtFollowingURL = &quot;https://api.github.com/users/%s/following?per_page=5&quot;
+  fmtStargazerURL = &quot;https://api.github.com/users/%s/starred&quot;
+)
+</code></pre>
+
+<p><em>(Note that I use <code>per_page=5</code> to create multiple requests to the endpoint, as there are not many users that I follow)</em></p>
+
+<h3 id="pipeline-pattern">Pipeline pattern</h3>
+
+<p>Function <code>usersFollowedBy</code> has the following interface:</p>
+
+<pre><code class="language-go">func usersFollowedBy(me string) &lt;-chan *User 
+</code></pre>
+
+<p>It immediately (almost) returns us a channel from where we can read, and proceeds to fetch the users in a separate goroutine and feeds us with users via the channel it returned. Consequently:</p>
+
+<pre><code class="language-go">reposStarredBy(users &lt;-chan *User) &lt;-chan *Repo
+</code></pre>
+
+<p>Another function consumes the user channel and returns a channel providing <code>Repo</code> objects.</p>
+
+<p>This is a typical <code>pipeline</code> pattern with multiple stages. Each stage (except first) consumes a channel, operates on it and returns an output channel. The following guidelines are applied:</p>
+
+<blockquote>
+<ol>
+<li>stages close their outbound channels when all the send operations are done.</li>
+<li>stages keep receiving values from inbound channels until those channels are closed or the senders are unblocked.</li>
+</ol>
+
+<p>Pipelines unblock senders either by ensuring there&rsquo;s enough buffer for all the values that are sent or by explicitly signalling senders when the receiver may abandon the channel.</p>
+</blockquote>
+
+<p>For now we will ignore channel abandoning, and let&rsquo;s see how we can enable channel pipelining in our program.</p>
+
+<h3 id="getting-users">Getting users</h3>
+
+<pre><code class="language-go">func usersFollowedBy(me string) &lt;-chan *User {
+	users := make(chan *User)
+	nextPage := fmt.Sprintf(fmtFollowingURL, me)
+	go func() {
+		wg := sync.WaitGroup{}
+		var (
+			result []*User
+			err    error
+		)
+		for nextPage != &quot;&quot; {
+			result, nextPage, err = getUsers(nextPage)
+			if err != nil {
+				panic(err)
+			}
+
+			wg.Add(1)
+			go func() {
+				for _, user := range result {
+					users &lt;- user
+				}
+				wg.Done()
+			}()
+		}
+		wg.Wait()
+		close(users)
+	}()
+
+	return users
+}
+</code></pre>
+
+<p><em>(<code>getUsers</code> details will be skipped for this post brevity, but can be seen in the full source link below)</em></p>
+
+<p>What function does is the following:</p>
+
+<ol>
+<li>Construct first URL from where we can fetch the User list I follow</li>
+<li>Launches a new goroutine which will stop executing when all users are fetched</li>
+<li>Returns a channel which will be closed when the goroutine finishes fetching users</li>
+</ol>
+
+<p>Note how this follows the guidelines set for the pipeline pattern.</p>
+
+<p>Another interesting part is the following code snippet from above:</p>
+
+<pre><code class="language-go">wg.Add(1)
+go func() {
+  for _, user := range result {
+    users &lt;- user
+  }
+  wg.Done()
+}()
+</code></pre>
+
+<p>This allows to fetch values from the second page even before channel consumer started receiving values from the first page. While <code>WaitGroup</code> allows us to keep the channel open until all the users are consumed. This pattern is used because the channel consumer does not care about order and may receive users from different pages concurrently.</p>
+
+<p><code>starredBy(*User)</code> function collects all repos starred by a user and returns a channel of type <code>*Repo</code>. It has extremely similar syntax and implementation to <code>usersFollowedBy</code> function, and we are not going to explain it in details (full source code can be found in the link below). What is more interesting is the merge of the channels output by <code>starredBy(*User)</code>. Here is the code:</p>
+
+<h3 id="fan-in">Fan in</h3>
+
+<pre><code class="language-go">func reposStarredBy(in &lt;-chan *User) &lt;-chan *Repo { // returns a list of repositories being starred by a list of users
+	repos := make(chan *Repo)
+
+	go func() {
+		wg := sync.WaitGroup{}
+		for u := range in {
+			wg.Add(1)
+			go func(u *User) {
+				defer wg.Done()
+				for repo := range starredBy(u) {
+					repos &lt;- repo
+				}
+			}(u)
+		}
+		wg.Wait()
+		close(repos)
+	}()
+
+	return repos
+}
+</code></pre>
+
+<p>This is a standard <strong>fan-in</strong> approach, where mutliple channels are being merged to one (all channels produced by <code>starredBy</code> call is merged into <code>repos</code> channel). Sending to a closed channel leads to panic, therefore we can use <code>WaitGroup</code> to ensure that the channel is closed only when all writes to it are finished.</p>
+
+<h3 id="channel-abandoning">Channel Abandoning</h3>
+
+<p>All code works as expected, but consider the following scenario. What if we are only interested in first 100 repostiories returned from our <code>reposStarredBy</code> and the rest of them don&rsquo;t matter ? What if our little script is turned into a daemon running hourly, something along the lines of :</p>
+
+<pre><code>for { 
+    repos := reposStarredBy(usersFollowedBy(*me)) //
+    for repo := range repos {
+      answer[repo.Link]++
+      if len(answer) &gt; 10 { 
+        break
+      }
+    }
+    time.Sleep(1 * time.Hour)
+}
+</code></pre>
+
+<p>If you try to run this script after a while you will find out that our little program is consuming gigabytes of memory. Why?</p>
+
+<p>The break statement has led to a case where no one is reading from a channel, therefore all attempts to write to a channel are blocked. It is important to remember that:</p>
+
+<blockquote>
+<ol>
+<li>All goroutines once launched <strong>are not</strong> terminated together with the caller goroutine</li>
+<li>Attempts to write to a full channel leads to goroutine being blocked, hence resources consumed by the goroutine are <strong>not</strong> released.</li>
+</ol>
+</blockquote>
+
+<p>There are two most common ways to address this problem:</p>
+
+<ol>
+<li>Make channels with buffers</li>
+<li>Signal sender goroutines to stop producing data once receiver stops accepting data</li>
+</ol>
+
+<p>While <code>(1)</code> is generally a simpler solution, it is by far not always possible. For example to create a buffer for <code>repos</code> channel produced by <code>reposStarredBy</code> function, we would have to know the total number of repositories starred by all people we follow. This is extremely tricky to calculate and probably not worth it. Therefore we will go with the second solution:</p>
+
+<pre><code class="language-go">  done := make(chan struct{}) 
+  for repo := range repos {
+    answer[repo.Link]++
+    if len(answer) &gt; 10 {
+      close(done) // signal to &quot;repos&quot; producer to stop trying writes 
+      break
+    }
+  }
+...
+  func reposStarredBy(done &lt;-chan struct{}, in &lt;-chan *User) &lt;-chan *Repo { // returns a list of repositories being starred by a list of users
+  ...
+    go func(u *User) {
+      defer wg.Done()
+      for repo := range starredBy(u) {
+        select {
+        case repos &lt;- repo:
+        case &lt;-done:
+        }
+      }
+    }(u)
+</code></pre>
+
+<p>Using <code>select</code> statement we can allow to drain producer of the <code>User</code> channel preventing resource leak in both <code>starredBy</code> and <code>usersFollowedBy</code> functions and inner goroutines. However, they will be running dummy HTTP requests, and to prevent that they need to be <code>done</code> aware as well - but this is left as an exercise to the reader.</p>
+
+<h3 id="conclusion">Conclusion</h3>
+
+<p><strong>Pipeline pattern:</strong></p>
+
+<p>Producers creates and returns a channel which is closed only once all values are sent or premature abortion is triggered by receiver.</p>
+
+<p>Consumer consumes all values from input channel until it is closed. It signals to senders via <code>done</code> channel when it stops receiving values.</p>
+
+<p><strong>Fan in:</strong></p>
+
+<p>Merge multiple channels into one output channel</p>
+
+<p><strong>Fan out:</strong></p>
+
+<p>Run multiple goroutines consuming from a single channel</p>
+
+<p><strong>Abandon channel:</strong></p>
+
+<p>Prevent resoure leak by creating a channel buffer or passing a channel to prevent goroutines being blocked by the full channel. Use select pattern.</p>
+
+<h3 id="links">Links:</h3>
+
+<ol>
+<li><p>Full source code available at: <a href="https://github.com/ideahitme/go-and-learn/blob/master/golang/concurrency/main.go">https://github.com/ideahitme/go-and-learn/blob/master/golang/concurrency/main.go</a></p></li>
+
+<li><p>Article based on: <a href="https://blog.golang.org/pipelines">https://blog.golang.org/pipelines</a></p></li>
+</ol>
+
+<h3 id="more-to-come">More to come</h3>
+
+<p>In the next article on this series we will perform goroutine leak analysis and analyze some other common concurrency patterns. We will also see how to gracefully handle errors.</p>
+
+<p>We will also compare <code>channel</code> vs <code>expressive</code> approaches and see which performs better.</p>
+
+    </section>
+</article>
+
+<footer id="post-meta" class="clearfix">
+    
+    <img class="avatar" src="https://ideahitme.github.io/images/yerken.png">
+    <div>
+        <span class="dark">Yerken</span>
+        <span>I&#39;m an idiot.</span>
+    </div>
+    
+    <section id="sharing">
+        <a class="twitter" href="https://twitter.com/intent/tweet?text=https%3a%2f%2fideahitme.github.io%2fposts%2fi-like-what-my-friends-like%2f - Go%20concurrency%20patterns "><span class="icon-twitter"> tweet</span></a>
+
+<a class="facebook" href="#" onclick="
+    window.open(
+      'https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(location.href),
+      'facebook-share-dialog',
+      'width=626,height=436');
+    return false;"><span class="icon-facebook-rect"> Share</span>
+</a>
+
+    </section>
+</footer>
+
+
+
+<ul id="post-list" class="archive readmore">
+    <h3>Read more</h3>
+
+    
+    
+    
+        <li>
+            <a href="/posts/sparse-set-in-go/">Sparse set in Go<aside class="dates">Jun 17 2017</aside></a>
+        </li>
+    
+        <li>
+            <a href="/posts/intro/">Is this thing on?<aside class="dates">Jun 15 2017</aside></a>
+        </li>
+    
+</ul>
+
+
+
+        <footer id="footer">
+    
+        <div id="social">
+
+	
+	
+    
+    <a class="symbol" href="https://www.github.com/ideahitme">
+        circlegithub
+    </a>
+    
+    <a class="symbol" href="https://www.linkedin.com/in/yerken-tussupbekov-0b0a3745/">
+        circlelinkedin
+    </a>
+    
+    <a class="symbol" href="https://www.twitter.com/ideahitme">
+        circletwitterbird
+    </a>
+    
+
+
+</div>
+
+    
+    <p class="small">
+    
+        © Copyright 2017 Yerken
+    
+    </p>
+</footer>
+
+    </section>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+<script src="https://ideahitme.github.io/js/main.js"></script>
+<script src="https://ideahitme.github.io/js/highlight.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+
+
+
+
+</body>
+</html>

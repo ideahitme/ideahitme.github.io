@@ -20,6 +20,24 @@
     </item>
     
     <item>
+      <title>Channels</title>
+      <link>https://ideahitme.github.io/categories/channels/</link>
+      <pubDate>Thu, 22 Jun 2017 00:00:00 +0000</pubDate>
+      
+      <guid>https://ideahitme.github.io/categories/channels/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Concurrency</title>
+      <link>https://ideahitme.github.io/categories/concurrency/</link>
+      <pubDate>Thu, 22 Jun 2017 00:00:00 +0000</pubDate>
+      
+      <guid>https://ideahitme.github.io/categories/concurrency/</guid>
+      <description></description>
+    </item>
+    
+    <item>
       <title>Data Structures</title>
       <link>https://ideahitme.github.io/categories/data-structures/</link>
       <pubDate>Sat, 17 Jun 2017 00:00:00 +0000</pubDate>
@@ -29,9 +47,27 @@
     </item>
     
     <item>
+      <title>Example</title>
+      <link>https://ideahitme.github.io/categories/example/</link>
+      <pubDate>Thu, 22 Jun 2017 00:00:00 +0000</pubDate>
+      
+      <guid>https://ideahitme.github.io/categories/example/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Explained</title>
+      <link>https://ideahitme.github.io/categories/explained/</link>
+      <pubDate>Thu, 22 Jun 2017 00:00:00 +0000</pubDate>
+      
+      <guid>https://ideahitme.github.io/categories/explained/</guid>
+      <description></description>
+    </item>
+    
+    <item>
       <title>Go</title>
       <link>https://ideahitme.github.io/categories/go/</link>
-      <pubDate>Sat, 17 Jun 2017 00:00:00 +0000</pubDate>
+      <pubDate>Thu, 22 Jun 2017 00:00:00 +0000</pubDate>
       
       <guid>https://ideahitme.github.io/categories/go/</guid>
       <description></description>
