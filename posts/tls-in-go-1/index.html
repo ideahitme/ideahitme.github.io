@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en-us">
+	<head>
+    <meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="author" content="Yerken">
+<meta name="description" content="Describe your website">
+<meta name="generator" content="Hugo 0.23-DEV" />
+<title>TLS in Go</title>
+<link rel="shortcut icon" href="https://ideahitme.github.io/images/favicon.ico">
+<link rel="stylesheet" href="https://ideahitme.github.io/css/style.css">
+<link rel="stylesheet" href="https://ideahitme.github.io/css/highlight.css">
+
+
+
+<link rel="stylesheet" href="https://ideahitme.github.io/css/monosocialiconsfont.css">
+
+
+
+
+<meta property="og:title" content="TLS in Go" />
+<meta property="og:description" content="TLS in GO. Part 1: Encrypting data using RSA in Go standard libraries" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://ideahitme.github.io/posts/tls-in-go-1/" />
+
+
+
+<meta property="article:published_time" content="2017-07-18T00:00:00&#43;00:00"/>
+<meta property="article:modified_time" content="2017-07-18T00:00:00&#43;00:00"/>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<meta itemprop="name" content="TLS in Go">
+<meta itemprop="description" content="TLS in GO. Part 1: Encrypting data using RSA in Go standard libraries">
+
+
+<meta itemprop="dateModified" content="2017-07-18T00:00:00&#43;00:00" />
+<meta itemprop="wordCount" content="746">
+
+
+
+<meta itemprop="keywords" content="beginners,cgo,channels,concurrency,data-structures,example,explained,go,not-golang,rsa,set,sparse,tls,x509,go-cgo-sparse-set-data-structures,go-channels-concurrency-github-api,go-tls-x509-pkcs-rsa,one-two-one-two," />
+
+
+
+  <meta name="twitter:card" content="summary"/>
+
+
+
+<meta name="twitter:text:title" content="TLS in Go"/>
+<meta name="twitter:title" content="TLS in Go"/>
+<meta name="twitter:description" content="TLS in GO. Part 1: Encrypting data using RSA in Go standard libraries"/>
+<meta name="twitter:site" content="@https://www.twitter.com/ideahitme"/>
+
+
+    </head>
+<body>
+    <nav class="main-nav">
+	
+		<a href='https://ideahitme.github.io/'> <span class="arrow">←</span>Home</a>
+	
+
+	
+ 		<a href='/about/'>About</a>
+  	
+
+	
+</nav>
+
+    <section id="wrapper">
+        
+        
+<article class="post">
+    <header>
+        <h1>TLS in Go</h1>
+        <h2 class="headline">
+        July 18, 2017
+        <br>
+        
+        
+            
+                <a href="https://ideahitme.github.io/tags/go-tls-x509-pkcs-rsa">GO TLS X509 PKCS RSA</a>
+            
+        
+        
+        </h2>
+    </header>
+    <section id="post-body">
+        
+
+<h2 id="tls-in-go">TLS in Go</h2>
+
+<p>This series of posts are aimed at explaining what is TLS, what are the most widely used
+encryption algorithms and how HTTPS works in general. These posts will be supported by
+examples of TLS components written using Go and its standard libraries. I am planning to
+write three posts and keep them extremely simple and useful for everyone new to HTTPS.</p>
+
+<p>This post will explain what is HTTPS, why it is needed and will as well explain main principles of RSA</p>
+
+<h2 id="https">HTTPS</h2>
+
+<p>HTTPS is simply HTTP with additional security layer. This security layer is above Transport layer and below Application layer in
+traditional OSI model. This security layer is often called TLS/SSL. Why we need both names ? Well, SSL is simply a predecessor of TLS
+however still used in the internet (SSL 3.0). TLS itself comprises two protocols: TLS record protocol and TLS handshake protocol. Both
+will be explained further.</p>
+
+<h2 id="purpose">Purpose</h2>
+
+<p>HTTP is simply not secure enough for people to guarantee safety of exchanged data in the open web. HTTPS, however, aims to solve three main
+problems which HTTP is vulnerable to:</p>
+
+<ol>
+<li>Data privacy - only sender and recepient are aware of the content being sent across the web</li>
+<li>Data integrity - both sender and recepient do know if the content has been altered while being transported between two parties</li>
+<li>Identification - both sender and recepient are able to prove that they are who they claim to be, hence both parties have trust relationship</li>
+</ol>
+
+<p>Additionally correctly configured TLS prevents leaked encryptions keys to be used to decrypt past messages</p>
+
+<h2 id="rsa">RSA</h2>
+
+<p>To understand what is RSA, we first need to understand what is asymmetric key encryption.</p>
+
+<p>Essentially asymmetric keys are public/private key pair. Public key is  used to encrypt the message. Encrypted message
+can only be decrypted using private key. Therefore, having encrypted message and public key without private key is useless.</p>
+
+<p>RSA defines an algorithm for such key pair generation. It uses elementary math(see link #4) for generating the keys, yet making it nearly
+impossible to reverse engineer the private key from the public key. The process of cracking RSA requires to factorize a large number
+<code>n</code> into two prime factors, therefore the larger value of <code>n</code>, more difficult it is to crack RSA (the largest cracked value of
+<code>n</code> consisted of ~700 bits)</p>
+
+<p>It is worth noting that there exist various ciphertext attacks (see #5), therefore, plaintext generally should be randomized before encryption.
+This for instance can be achieved by adding some random content at the beginning and the end of the plain text before encryption. This is know as <strong>padding</strong>. OAEP is one of the most commonly used padding schemes.
+There is a PKCS#1 padding scheme as well, but OAEP is generally superior (see link #2)</p>
+
+<p>The last important thing to remember is that the encrypted message should be smaller than the bit size of the key pair used. For OAEP
+this length in the example below should not exceed (2048 - 2 * 256) bits (message is padded by 256 bit hash values from both sides).</p>
+
+<p>Let&rsquo;s see how it works in Go:</p>
+
+<pre><code class="language-go">package main
+
+import (
+	&quot;crypto&quot;
+	&quot;crypto/rand&quot;
+	&quot;crypto/rsa&quot;
+	&quot;crypto/sha256&quot;
+	&quot;fmt&quot;
+)
+
+func main() {
+	message := []byte(&quot;Hello World!&quot;)
+
+	privKey, _ := GenerateKeyPair()
+    // use OAEP for padding
+	encryptedMessage, _ := rsa.EncryptOAEP(sha256.New(), rand.Reader, &amp;privKey.PublicKey, message, nil)
+    // use same hashing function as for encryption 
+	decryptedMessage, _ := privKey.Decrypt(rand.Reader, encryptedMessage, &amp;rsa.OAEPOptions{
+		Hash: crypto.SHA256,
+	})
+	fmt.Printf(&quot;decrypted message: %s&quot;, string(decryptedMessage))
+}
+
+// GenerateKeyPair returns a private key (but it encapsulates the public key), therefore rsa.PrivateKey can be used as an asymmetric key pair
+func GenerateKeyPair() (*rsa.PrivateKey, error) {
+	// 2048 - specifies the size of the above-mentioned variable `n`
+	// rand.Reader - allows to select random prime numbers p, q to compute n = p * q
+	privateKey, err := rsa.GenerateKey(rand.Reader, 2048)
+	if err != nil {
+		return nil, err
+	}
+	return privateKey, nil
+}
+</code></pre>
+
+<h2 id="next">Next</h2>
+
+<ol>
+<li>We will take a look at how RSA is used in SSL, and analyze AES as an alternative to RSA.</li>
+<li>We will study how to create and verify secure digital signatures in Go</li>
+<li>We will use Go to generate secure and self-signed certificates to establish secure connections<br /></li>
+<li>We will take a closer look at HTTPS protocol implementation with details on the actual payloads and rules - more advanced topics</li>
+</ol>
+
+<h2 id="links">Links:</h2>
+
+<ol>
+<li><a href="https://msdn.microsoft.com/en-us/library/windows/desktop/aa387460(v=vs.85).aspx">https://msdn.microsoft.com/en-us/library/windows/desktop/aa387460(v=vs.85).aspx</a> - on assymetric keys</li>
+<li><a href="https://en.wikipedia.org/wiki/Optimal_asymmetric_encryption_padding">https://en.wikipedia.org/wiki/Optimal_asymmetric_encryption_padding</a> - OAEP is a standard padding scheme</li>
+<li><a href="https://security.stackexchange.com/questions/32050/what-specific-padding-weakness-does-oaep-address-in-rsa">https://security.stackexchange.com/questions/32050/what-specific-padding-weakness-does-oaep-address-in-rsa</a>  - OAEP vs PKCS</li>
+<li><a href="https://simple.wikipedia.org/wiki/RSA_(algorithm">https://simple.wikipedia.org/wiki/RSA_(algorithm</a>) - RSA principles</li>
+<li><a href="https://simple.wikipedia.org/wiki/Chosen-ciphertext_attack">https://simple.wikipedia.org/wiki/Chosen-ciphertext_attack</a> - Chosen-ciphertext_attack</li>
+</ol>
+
+    </section>
+</article>
+
+<footer id="post-meta" class="clearfix">
+    
+    <img class="avatar" src="https://ideahitme.github.io/images/yerken.png">
+    <div>
+        <span class="dark">Yerken</span>
+        <span>I&#39;m an idiot.</span>
+    </div>
+    
+    <section id="sharing">
+        <a class="twitter" href="https://twitter.com/intent/tweet?text=https%3a%2f%2fideahitme.github.io%2fposts%2ftls-in-go-1%2f - TLS%20in%20Go "><span class="icon-twitter"> tweet</span></a>
+
+<a class="facebook" href="#" onclick="
+    window.open(
+      'https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(location.href),
+      'facebook-share-dialog',
+      'width=626,height=436');
+    return false;"><span class="icon-facebook-rect"> Share</span>
+</a>
+
+    </section>
+</footer>
+
+
+
+<ul id="post-list" class="archive readmore">
+    <h3>Read more</h3>
+
+    
+    
+    
+        <li>
+            <a href="/posts/i-like-what-my-friends-like/">Go concurrency patterns<aside class="dates">Jun 22 2017</aside></a>
+        </li>
+    
+        <li>
+            <a href="/posts/sparse-set-in-go/">Sparse set in Go<aside class="dates">Jun 17 2017</aside></a>
+        </li>
+    
+        <li>
+            <a href="/posts/intro/">Is this thing on?<aside class="dates">Jun 15 2017</aside></a>
+        </li>
+    
+</ul>
+
+
+
+        <footer id="footer">
+    
+        <div id="social">
+
+	
+	
+    
+    <a class="symbol" href="https://www.github.com/ideahitme">
+        circlegithub
+    </a>
+    
+    <a class="symbol" href="https://www.linkedin.com/in/yerken-tussupbekov-0b0a3745/">
+        circlelinkedin
+    </a>
+    
+    <a class="symbol" href="https://www.twitter.com/ideahitme">
+        circletwitterbird
+    </a>
+    
+
+
+</div>
+
+    
+    <p class="small">
+    
+        © Copyright 2017 Yerken
+    
+    </p>
+</footer>
+
+    </section>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+<script src="https://ideahitme.github.io/js/main.js"></script>
+<script src="https://ideahitme.github.io/js/highlight.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+
+
+
+
+</body>
+</html>

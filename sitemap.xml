@@ -3,6 +3,11 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
+    <loc>https://ideahitme.github.io/posts/tls-in-go-1/</loc>
+    <lastmod>2017-07-18T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
     <loc>https://ideahitme.github.io/posts/i-like-what-my-friends-like/</loc>
     <lastmod>2017-06-22T00:00:00+00:00</lastmod>
   </url>
@@ -23,7 +28,14 @@
   </url>
   
   <url>
+    <loc>https://ideahitme.github.io/categories/beginners/</loc>
+    <lastmod>2017-07-18T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
     <loc>https://ideahitme.github.io/categories/</loc>
+    <lastmod>2017-07-18T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -65,7 +77,7 @@
   
   <url>
     <loc>https://ideahitme.github.io/categories/go/</loc>
-    <lastmod>2017-06-22T00:00:00+00:00</lastmod>
+    <lastmod>2017-07-18T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -78,6 +90,12 @@
   <url>
     <loc>https://ideahitme.github.io/tags/go-channels-concurrency-github-api/</loc>
     <lastmod>2017-06-22T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://ideahitme.github.io/tags/go-tls-x509-pkcs-rsa/</loc>
+    <lastmod>2017-07-18T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -95,7 +113,13 @@
   
   <url>
     <loc>https://ideahitme.github.io/posts/</loc>
-    <lastmod>2017-06-22T00:00:00+00:00</lastmod>
+    <lastmod>2017-07-18T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://ideahitme.github.io/categories/rsa/</loc>
+    <lastmod>2017-07-18T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -118,8 +142,20 @@
   </url>
   
   <url>
+    <loc>https://ideahitme.github.io/categories/tls/</loc>
+    <lastmod>2017-07-18T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://ideahitme.github.io/categories/x509/</loc>
+    <lastmod>2017-07-18T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
     <loc>https://ideahitme.github.io/</loc>
-    <lastmod>2017-06-22T00:00:00+00:00</lastmod>
+    <lastmod>2017-07-18T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   

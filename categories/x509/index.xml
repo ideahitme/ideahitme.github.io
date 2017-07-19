@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>X509 on Yerken&#39;s blog</title>
+    <link>https://ideahitme.github.io/categories/x509/</link>
+    <description>Recent content in X509 on Yerken&#39;s blog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Tue, 18 Jul 2017 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="https://ideahitme.github.io/categories/x509/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>TLS in Go</title>
+      <link>https://ideahitme.github.io/posts/tls-in-go-1/</link>
+      <pubDate>Tue, 18 Jul 2017 00:00:00 +0000</pubDate>
+      
+      <guid>https://ideahitme.github.io/posts/tls-in-go-1/</guid>
+      <description>TLS in Go This series of posts are aimed at explaining what is TLS, what are the most widely used encryption algorithms and how HTTPS works in general. These posts will be supported by examples of TLS components written using Go and its standard libraries. I am planning to write three posts and keep them extremely simple and useful for everyone new to HTTPS.
+This post will explain what is HTTPS, why it is needed and will as well explain main principles of RSA</description>
+    </item>
+    
+  </channel>
+</rss>
