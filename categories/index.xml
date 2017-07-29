@@ -6,10 +6,19 @@
     <description>Recent content in Categories on Yerken&#39;s blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Tue, 18 Jul 2017 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Sat, 29 Jul 2017 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="https://ideahitme.github.io/categories/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Algebra</title>
+      <link>https://ideahitme.github.io/categories/algebra/</link>
+      <pubDate>Sat, 29 Jul 2017 00:00:00 +0000</pubDate>
+      
+      <guid>https://ideahitme.github.io/categories/algebra/</guid>
+      <description></description>
+    </item>
     
     <item>
       <title>Beginners</title>
@@ -84,11 +93,38 @@
     </item>
     
     <item>
+      <title>Imo</title>
+      <link>https://ideahitme.github.io/categories/imo/</link>
+      <pubDate>Sat, 29 Jul 2017 00:00:00 +0000</pubDate>
+      
+      <guid>https://ideahitme.github.io/categories/imo/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Math</title>
+      <link>https://ideahitme.github.io/categories/math/</link>
+      <pubDate>Sat, 29 Jul 2017 00:00:00 +0000</pubDate>
+      
+      <guid>https://ideahitme.github.io/categories/math/</guid>
+      <description></description>
+    </item>
+    
+    <item>
       <title>Not Golang</title>
       <link>https://ideahitme.github.io/categories/not-golang/</link>
       <pubDate>Thu, 15 Jun 2017 00:00:00 +0000</pubDate>
       
       <guid>https://ideahitme.github.io/categories/not-golang/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Problems</title>
+      <link>https://ideahitme.github.io/categories/problems/</link>
+      <pubDate>Sat, 29 Jul 2017 00:00:00 +0000</pubDate>
+      
+      <guid>https://ideahitme.github.io/categories/problems/</guid>
       <description></description>
     </item>
     
@@ -107,6 +143,15 @@
       <pubDate>Sat, 17 Jun 2017 00:00:00 +0000</pubDate>
       
       <guid>https://ideahitme.github.io/categories/set/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Solution</title>
+      <link>https://ideahitme.github.io/categories/solution/</link>
+      <pubDate>Sat, 29 Jul 2017 00:00:00 +0000</pubDate>
+      
+      <guid>https://ideahitme.github.io/categories/solution/</guid>
       <description></description>
     </item>
     

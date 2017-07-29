@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en-us">
+	<head>
+    <meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="author" content="Yerken">
+<meta name="description" content="Describe your website">
+<meta name="generator" content="Hugo 0.23-DEV" />
+<title>IMO Problem 1</title>
+<link rel="shortcut icon" href="https://ideahitme.github.io/images/favicon.ico">
+<link rel="stylesheet" href="https://ideahitme.github.io/css/style.css">
+<link rel="stylesheet" href="https://ideahitme.github.io/css/highlight.css">
+
+
+
+<link rel="stylesheet" href="https://ideahitme.github.io/css/monosocialiconsfont.css">
+
+
+
+
+<meta property="og:title" content="IMO Problem 1" />
+<meta property="og:description" content="Solution of IMO 2017 problem 1 " />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://ideahitme.github.io/posts/imo-problem-1/" />
+
+
+
+<meta property="article:published_time" content="2017-07-29T00:00:00&#43;00:00"/>
+<meta property="article:modified_time" content="2017-07-29T00:00:00&#43;00:00"/>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<meta itemprop="name" content="IMO Problem 1">
+<meta itemprop="description" content="Solution of IMO 2017 problem 1 ">
+
+
+<meta itemprop="dateModified" content="2017-07-29T00:00:00&#43;00:00" />
+<meta itemprop="wordCount" content="851">
+
+
+
+<meta itemprop="keywords" content="algebra,beginners,cgo,channels,concurrency,data-structures,example,explained,go,imo,math,not-golang,problems,rsa,set,solution,sparse,tls,x509,go-cgo-sparse-set-data-structures,go-channels-concurrency-github-api,go-tls-x509-pkcs-rsa,imo-math-problems-algebra-solution,one-two-one-two," />
+
+
+
+  <meta name="twitter:card" content="summary"/>
+
+
+
+<meta name="twitter:text:title" content="IMO Problem 1"/>
+<meta name="twitter:title" content="IMO Problem 1"/>
+<meta name="twitter:description" content="Solution of IMO 2017 problem 1 "/>
+<meta name="twitter:site" content="@https://www.twitter.com/ideahitme"/>
+
+
+    </head>
+<body>
+    <nav class="main-nav">
+	
+		<a href='https://ideahitme.github.io/'> <span class="arrow">←</span>Home</a>
+	
+
+	
+ 		<a href='/about/'>About</a>
+  	
+
+	
+</nav>
+
+    <section id="wrapper">
+        
+        
+<article class="post">
+    <header>
+        <h1>IMO Problem 1</h1>
+        <h2 class="headline">
+        July 29, 2017
+        <br>
+        
+        
+            
+                <a href="https://ideahitme.github.io/tags/imo-math-problems-algebra-solution">IMO Math Problems Algebra Solution</a>
+            
+        
+        
+        </h2>
+    </header>
+    <section id="post-body">
+        
+
+<h2 id="introduction">Introduction</h2>
+
+<p>IMO - is an international mathematical olympiad held every year in summer in different countries. It is the most prestigious and arguably the most difficult math olympiad for high-school students. Math problems generally require original thinking and certain theoretical background. In the next series of posts I will try to present solutions and views on the problems from the point of view of past silver medalist of this olympiad,who however did not practice math olympiad problems for almost a decade.</p>
+
+<h2 id="problem-1">Problem 1</h2>
+
+<p><strong>Statement:</strong></p>
+
+<p>For each integer <code>a[0] &gt; 1</code>, define the infinite sequence <code>a[0]</code>, <code>a[1]</code>, <code>a[2]</code>, &hellip; as follows:</p>
+
+<p><code>a[n+1]</code> is a square root of <code>a[n]</code> if <code>a[n]</code> is a perfect square, otherwise <code>a[n+1] = a[n] + 3</code></p>
+
+<p>Determine all values of <code>a[0]</code> for which there is a number <code>A</code> such that <code>a[n]</code> = <code>A</code> for infinitely many values
+of <code>n</code>.</p>
+
+<hr />
+
+<p><strong>Solution:</strong></p>
+
+<p>Let&rsquo;s <strong>rephrase</strong> the question (think why this is equivalent statement!):</p>
+
+<blockquote>
+<p>Determine all values of <code>a[0]</code> such that our sequence is periodic.</p>
+</blockquote>
+
+<p>Assume that <code>a[0]</code> is a multiple of <code>3</code>, we will show that our sequence will then have a period and hence fulfill the problem statement. Indeed, <strong>assume the opposite:</strong> that there exist such values of <code>a[0]</code> where a generated sequence is <strong>not periodic</strong>. Among such values of <code>a[0]</code>&rsquo;s let pick the minimum - <code>x</code>. Generated sequence will look as follows: <code>x, x+3, x+6..., y, sqrt(y)...</code>, where <code>y</code> is the first perfect square to occur in the sequence (it must be there because at least <code>x*x - x</code> is divisible by <code>3</code>). We will show that:</p>
+
+<blockquote>
+<p><code>x*x &gt;= y</code> or <strong><code>sqrt(y) &lt; x</code></strong>. <strong>(1)</strong></p>
+</blockquote>
+
+<p>Denote <code>floor(sqrt(x))</code> as <code>z</code>, (<code>z &gt;= 2</code>, case <code>z = 1</code> is easy to check manually). Apparently <code>z*z &lt;= x &lt; (z+1)*(z+1)</code>. Since <code>x</code> is divisible by <code>3</code> and the sequence grows by <code>3</code> until it reaches <code>y</code>, the value of <code>y</code> has to be divisible by <code>3</code> as well, and so is its square root, i.e. <strong><code>3</code> divides <code>sqrt(y)</code>.</strong>. Hence, if <code>m = z mod 3</code>, then <code>sqrt(y) = (z + 3 - m)</code>, but then as we established <code>x &gt;= (z * z) &gt; (z + (3 - m)) = sqrt(y)</code>. Therefore we proved statement <strong><code>(1)</code></strong> from above. But that means we found a value <code>sqrt(y)</code> which is divisible by <code>3</code> and it does not generate a periodic sequence while being smaller than <code>x</code> - <strong>contradiction!</strong>. Now as we have proven if value of <code>a[0]</code> is divisible by <code>3</code> then our sequence is periodic.</p>
+
+<p>Now assume that <code>a[0] mod 3 = 2</code> and claim that our sequence is not periodic. In fact, we will prove a slightly stronger statement.</p>
+
+<p><strong>Lemma X</strong>:</p>
+
+<blockquote>
+<p>if there is a member <code>x</code> in our sequence <code>a[0], a[1] ...</code>, such that <code>x mod 3 = 2</code> then our sequence is not periodic</p>
+</blockquote>
+
+<p>Note that a perfect square cannot have a remainder <code>2</code> modulus <code>3</code> (this is easy to check by hand), therefore starting from value of <code>x</code>: <code>x, x+3, x+6, ...</code> will all have the same remainder <code>2</code> mod <code>3</code>. Which means the only operation applied to our sequence is <code>+3</code> - therefore it is an infinitely growing sequence!</p>
+
+<p>The only left case is if <code>a[0] mod 3 = 1</code>. We will show that in this case our sequence is not periodic as well. Let&rsquo;s use contradiction method again and assume there is a value of <code>a[0]</code> such that <code>a[0] mod 3 = 1</code> and the sequence is periodic. Among such value of <code>a[0]</code> we pick the miniumum - <code>x</code>. And similar to the first case assume first perfect square to appear is <code>y</code> (if there is none then our sequence is not periodic). If <code>sqrt(y) mod 3 == 2</code> then due to Lemma X our sequence is not periodic. Therefore <strong><code>sqrt(y) mod 3 == 1</code></strong> (none of the values in our sequence is divisible by <code>3</code> - which is easy to check). Similarly to the first case we can show that <code>sqrt(y) &lt; x</code> which contradicts to the assumption that <code>x</code> is a minimum. Contradiction!</p>
+
+<p><strong>Answer:</strong> The only value satisfying values of <code>a[0]</code> are all the natural numbers divisible by <code>3</code>.</p>
+
+<h2 id="conclusion">Conclusion:</h2>
+
+<p>First step to solving the problem was rephrasing it. It is an important step, because it often helps to simplify and to understand what is actually important in the question. It also helps to see a problem under different light sometimes.</p>
+
+<p>Next step was to split the problem into multiple cases. It is helpful because it gives us additional information which can be used to analyze the problem further. For instance in this problem, we split the cases by the remainder of <code>a[0]</code> modulo 3, because analyzing the problem knowing this information is a lot simpler.</p>
+
+<p>We used mainly two tricks in this problem:</p>
+
+<ol>
+<li><p>Contradiction method: assume that the statement false and come to the contradiction, hence proving the statement itself.</p></li>
+
+<li><p>Pick a minimum (or maximum) satisfying the requirements. This is a good method to use in conjuction with contradiction method, if we can arrive to a smaller (bigger) value satisfying the requirements hence a giving us a contradiction.</p></li>
+</ol>
+
+<p>Hope u had fun reading this!</p>
+
+    </section>
+</article>
+
+<footer id="post-meta" class="clearfix">
+    
+    <img class="avatar" src="https://ideahitme.github.io/images/yerken.png">
+    <div>
+        <span class="dark">Yerken</span>
+        <span>I&#39;m an idiot.</span>
+    </div>
+    
+    <section id="sharing">
+        <a class="twitter" href="https://twitter.com/intent/tweet?text=https%3a%2f%2fideahitme.github.io%2fposts%2fimo-problem-1%2f - IMO%20Problem%201 "><span class="icon-twitter"> tweet</span></a>
+
+<a class="facebook" href="#" onclick="
+    window.open(
+      'https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(location.href),
+      'facebook-share-dialog',
+      'width=626,height=436');
+    return false;"><span class="icon-facebook-rect"> Share</span>
+</a>
+
+    </section>
+</footer>
+
+
+
+<ul id="post-list" class="archive readmore">
+    <h3>Read more</h3>
+
+    
+    
+    
+        <li>
+            <a href="/posts/tls-in-go-1/">TLS in Go<aside class="dates">Jul 18 2017</aside></a>
+        </li>
+    
+        <li>
+            <a href="/posts/i-like-what-my-friends-like/">Go concurrency patterns<aside class="dates">Jun 22 2017</aside></a>
+        </li>
+    
+        <li>
+            <a href="/posts/sparse-set-in-go/">Sparse set in Go<aside class="dates">Jun 17 2017</aside></a>
+        </li>
+    
+        <li>
+            <a href="/posts/intro/">Is this thing on?<aside class="dates">Jun 15 2017</aside></a>
+        </li>
+    
+</ul>
+
+
+
+        <footer id="footer">
+    
+        <div id="social">
+
+	
+	
+    
+    <a class="symbol" href="https://www.github.com/ideahitme">
+        circlegithub
+    </a>
+    
+    <a class="symbol" href="https://www.linkedin.com/in/yerken-tussupbekov-0b0a3745/">
+        circlelinkedin
+    </a>
+    
+    <a class="symbol" href="https://www.twitter.com/ideahitme">
+        circletwitterbird
+    </a>
+    
+
+
+</div>
+
+    
+    <p class="small">
+    
+        © Copyright 2017 Yerken
+    
+    </p>
+</footer>
+
+    </section>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+<script src="https://ideahitme.github.io/js/main.js"></script>
+<script src="https://ideahitme.github.io/js/highlight.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+
+
+
+
+</body>
+</html>

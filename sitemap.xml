@@ -3,6 +3,11 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
+    <loc>https://ideahitme.github.io/posts/imo-problem-1/</loc>
+    <lastmod>2017-07-29T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
     <loc>https://ideahitme.github.io/posts/tls-in-go-1/</loc>
     <lastmod>2017-07-18T00:00:00+00:00</lastmod>
   </url>
@@ -28,6 +33,12 @@
   </url>
   
   <url>
+    <loc>https://ideahitme.github.io/categories/algebra/</loc>
+    <lastmod>2017-07-29T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
     <loc>https://ideahitme.github.io/categories/beginners/</loc>
     <lastmod>2017-07-18T00:00:00+00:00</lastmod>
     <priority>0</priority>
@@ -35,7 +46,7 @@
   
   <url>
     <loc>https://ideahitme.github.io/categories/</loc>
-    <lastmod>2017-07-18T00:00:00+00:00</lastmod>
+    <lastmod>2017-07-29T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -100,6 +111,24 @@
   </url>
   
   <url>
+    <loc>https://ideahitme.github.io/categories/imo/</loc>
+    <lastmod>2017-07-29T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://ideahitme.github.io/tags/imo-math-problems-algebra-solution/</loc>
+    <lastmod>2017-07-29T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://ideahitme.github.io/categories/math/</loc>
+    <lastmod>2017-07-29T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
     <loc>https://ideahitme.github.io/categories/not-golang/</loc>
     <lastmod>2017-06-15T00:00:00+00:00</lastmod>
     <priority>0</priority>
@@ -113,7 +142,13 @@
   
   <url>
     <loc>https://ideahitme.github.io/posts/</loc>
-    <lastmod>2017-07-18T00:00:00+00:00</lastmod>
+    <lastmod>2017-07-29T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://ideahitme.github.io/categories/problems/</loc>
+    <lastmod>2017-07-29T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -126,6 +161,12 @@
   <url>
     <loc>https://ideahitme.github.io/categories/set/</loc>
     <lastmod>2017-06-17T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://ideahitme.github.io/categories/solution/</loc>
+    <lastmod>2017-07-29T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -155,7 +196,7 @@
   
   <url>
     <loc>https://ideahitme.github.io/</loc>
-    <lastmod>2017-07-18T00:00:00+00:00</lastmod>
+    <lastmod>2017-07-29T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   

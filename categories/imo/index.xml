@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Imo on Yerken&#39;s blog</title>
+    <link>https://ideahitme.github.io/categories/imo/</link>
+    <description>Recent content in Imo on Yerken&#39;s blog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Sat, 29 Jul 2017 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="https://ideahitme.github.io/categories/imo/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>IMO Problem 1</title>
+      <link>https://ideahitme.github.io/posts/imo-problem-1/</link>
+      <pubDate>Sat, 29 Jul 2017 00:00:00 +0000</pubDate>
+      
+      <guid>https://ideahitme.github.io/posts/imo-problem-1/</guid>
+      <description>Introduction IMO - is an international mathematical olympiad held every year in summer in different countries. It is the most prestigious and arguably the most difficult math olympiad for high-school students. Math problems generally require original thinking and certain theoretical background. In the next series of posts I will try to present solutions and views on the problems from the point of view of past silver medalist of this olympiad,who however did not practice math olympiad problems for almost a decade.</description>
+    </item>
+    
+  </channel>
+</rss>
